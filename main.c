@@ -3,8 +3,6 @@
 
 Entity* player;
 Entity* hazard;
-Entity* hazard2;
-Entity* hazard3;
 
 int collision = 0;
 int boundary = 0;
