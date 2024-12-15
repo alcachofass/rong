@@ -12,6 +12,7 @@ int y;
 
 int captured = 0;
 int missed = 0;
+int maxMissCount;
 
 int stopFlag = 0;
 
@@ -19,10 +20,22 @@ pthread_t t_id[4];
 
 int main(int argc, char *argv[]){
  
+    srand(time(NULL));
+
+    if (argc >= 2)
+    {
+        maxMissCount = atoi(argv[1]);
+    }
+
+    else {
+        maxMissCount = MAX_MISSED;
+    }
+
     timeCounter.tv_nsec = STARTING_COUNTER;
+    screenCounter.tv_nsec = SCREEN_REFRESH;
     
-    x = rand() % GRID_X + 1;
-    y = rand() % (GRID_Y + 1 - 3) + 3;
+    x = (rand() % (MAX_PLAYER_RIGHT - MAX_PLAYER_LEFT + 1) + MAX_PLAYER_LEFT);
+    y = MAX_PLAYER_UP; //() % (GRID_Y + 1 - 3) + 3;
     
     Position start_pos = { PLAYER_Y, PLAYER_X };
     Position h_pos = { y, x };

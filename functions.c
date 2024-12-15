@@ -1,7 +1,7 @@
 #include "headers.h"
 
 int kch;
-struct timespec timeCounter;
+struct timespec timeCounter, screenCounter;
 
 void *keyListen (void * varg){       
     while(kch = getch()){
@@ -14,18 +14,19 @@ void *keyListen (void * varg){
         mvaddch(player->pos.y, player->pos.x, player->ch);
         mvaddch(hazard->pos.y, hazard->pos.x, hazard->ch);
 
-        if (missed == MAX_MISSED){
+        // To keep Game Over text on screen even if keys are pressed
+        if (missed == maxMissCount){
             updateScreen();
-            mvaddstr(20,20, "Game Over");
+            mvaddstr(CENTER,CENTER - 3, "Game Over");
             refresh();
             stopFlag = 1;
-            }
+        }
 
         int collision = checkCollision();
 
         if (collision == 1) {
-            x = rand() % GRID_X + 1;
-            y = rand() % (GRID_Y + 1 - 3) + 3;
+            x = (rand() % (MAX_PLAYER_RIGHT - MAX_PLAYER_LEFT + 1) + MAX_PLAYER_LEFT);
+            y = MAX_PLAYER_UP;
             Position h_pos_new = { y, x };
             hazard = createHazard(h_pos_new);
             mvaddch(hazard->pos.y, hazard->pos.x, hazard->ch);
@@ -47,12 +48,14 @@ void *timedDrop (void * varg){
 
         nanosleep(&timeCounter, NULL);
 
-        if (hazard->pos.y == 50){
-            hazard->pos.y = 4;
+        if (hazard->pos.y == MAX_PLAYER_DOWN){
+            hazard->pos.y = MAX_PLAYER_UP;
+            hazard->pos.x = (rand() % (MAX_PLAYER_RIGHT - MAX_PLAYER_LEFT + 1) + MAX_PLAYER_LEFT);
+          
             missed++;
-            if (missed == MAX_MISSED){
+            if (missed == maxMissCount){
                 updateScreen();
-                mvaddstr(20,20, "Game Over");
+                mvaddstr(CENTER,CENTER - 3, "Game Over");
                 refresh();
                 stopFlag = 1;
             }
@@ -62,8 +65,8 @@ void *timedDrop (void * varg){
             int collision = checkCollision();
 
             if (collision == 1) {
-                x = rand() % GRID_X + 1;
-                y = rand() % (GRID_Y + 1 - 3) + 3;
+                x = (rand() % (MAX_PLAYER_RIGHT - MAX_PLAYER_LEFT + 1) + MAX_PLAYER_LEFT);
+                y = MAX_PLAYER_UP;
 
                 Position h_pos_new = { y, x };
                 hazard = createHazard(h_pos_new);
@@ -82,13 +85,15 @@ void *drawScreen (void * varg){
         }
 
         updateScreen();
-        nanosleep(&timeCounter, NULL);
+        nanosleep(&screenCounter, NULL);
     }
     
     return NULL;
 }
 
 void updateScreen (){
+        clear();        
+
         char cap[3];
         char mis[3];
         char spd[20];
@@ -97,20 +102,23 @@ void updateScreen (){
         sprintf(mis, "%d", missed);
         sprintf(spd, "%d", timeCounter.tv_nsec);
 
-        clear();        
+        mvaddstr(0,0,  "Captured: ");
+        mvaddstr(0,10, cap);
+
+        mvaddstr(1,0,  "Missed: ");
+        mvaddstr(1,10, mis);
+
+        mvaddstr(0,33, "Wait(ns): " );
+        mvaddstr(0,43, spd);
+
+        mvaddstr(0,20, "RONG");
+
         mvaddch(player->pos.y, player->pos.x, player->ch);
         mvaddch(hazard->pos.y, hazard->pos.x, hazard->ch);
 
-        mvaddstr(0,0,  "Captured: ");
-        mvaddstr(1,0,  "Missed: ");
-        mvaddstr(2,0,  "Wait(ns): " );
-
         mvaddstr(51,0, "Press 'q' to quit.");
         mvaddstr(52,0, "RONG by alcachofass - https://github.com/alcachofass");
-        mvaddstr(0,10, cap);
-        mvaddstr(1,10, mis);
-        mvaddstr(2,10, spd);
-
+        
         refresh();
 
         return;
@@ -124,21 +132,34 @@ void *handleInput(void * varg)
     {
         case KEY_UP:
             player->pos.y--;
+            if (player->pos.y < MAX_PLAYER_UP){
+                player->pos.y = MAX_PLAYER_UP;
+            }
             updateScreen();
             break;
         case KEY_DOWN:
             player->pos.y++;
+            if (player->pos.y > MAX_PLAYER_DOWN){
+                player->pos.y = MAX_PLAYER_DOWN;
+            }
             updateScreen();
             break;
         case KEY_LEFT:
             player->pos.x--;
+            if (player->pos.x < MAX_PLAYER_LEFT){
+                player->pos.x = MAX_PLAYER_LEFT;
+            }
             updateScreen();
             break;
         case KEY_RIGHT:
             player->pos.x++;
+            if (player->pos.x > MAX_PLAYER_RIGHT){
+                player->pos.x = MAX_PLAYER_RIGHT;
+            }
             updateScreen();
             break;
         default:
+            updateScreen();
             break;
     }
 
