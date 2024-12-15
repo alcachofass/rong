@@ -63,6 +63,9 @@ extern int kch;
 extern int captured;
 extern int missed;
 extern int stopFlag;
+extern int pauseFlag;
 extern int maxMissCount;
+
+extern pthread_mutex_t lock;
 
 #endif

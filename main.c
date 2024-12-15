@@ -15,6 +15,7 @@ int missed = 0;
 int maxMissCount;
 
 int stopFlag = 0;
+int pauseFlag = 0;
 
 pthread_t t_id[4];
 
@@ -50,8 +51,6 @@ int main(int argc, char *argv[]){
 
     hazard = createHazard(h_pos);
     mvaddch(hazard->pos.y, hazard->pos.x, hazard->ch);
-
-    updateScreen();
 
     pthread_create(&t_id[0], NULL, timedDrop, NULL );
     pthread_create(&t_id[1], NULL, drawScreen, NULL );
