@@ -1,5 +1,17 @@
-# rong
+# RONG
 A threaded terminal game that uses ncurses libraries.
 
-# screenshot
+# Building
+> make
+
+# Run
+Defaults:  
+
+> ./rong 
+
+
+Game ends after 50 missed hazards:
+> ./rong 50
+
+# Screenshot
 ![screenshot](images/rong.png)
